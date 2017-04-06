@@ -13,14 +13,25 @@ app.use(bodyParser.json());
 
 app.post('/todos',(req,res)=>{
   console.log(req.body);
-  var todo = new Todo({
-    text: req.body.text
-  });
-  todo.save().then((doc)=>{
-    res.send(doc);
-  },(e)=>{
-    res.status(400).send(e);
-  });
+  if(req.body.todos && req.body.todos.length>0){
+    var todos = req.body.todos;
+    console.log(`Insert of array of todo ${todos.length}`);
+    Todo.insertMany(todos).then((todos)=>{
+      res.send({todos});
+    },(e)=>{
+      res.status(400).send(e);
+    });
+  } else {
+    console.log('Insert of a single todo');
+    var todo = new Todo({
+      text: req.body.text
+    });
+    todo.save().then((doc)=>{
+      res.send(doc);
+    },(e)=>{
+      res.status(400).send(e);
+    });
+  }
 });
 app.get('/todos',(req,res)=>{
   Todo.find().then((todos)=>{
@@ -44,6 +55,19 @@ app.get('/todos/:id', (req,res)=>{
     }).catch((e)=>{
       res.status(400).send();
     });
+});
+
+app.delete('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+  if(!ObjectID.isValid(id))
+    return res.status(404).send();
+  Todo.findByIdAndRemove(id).then((todo)=>{
+    if(!todo)
+      return res.status(404).send();
+    return res.send(todo);
+  }).catch((e)=>{
+    res.status(400).send();
+  });
 });
 
 app.listen(port,()=>{
