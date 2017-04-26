@@ -66,7 +66,8 @@ UserSchema.statics.findByToken = function(token){
     'tokens.token': token,
     'tokens.access': 'auth'
   });
-}
+};
+
 UserSchema.pre('save',function(next){
   var user = this;
 
@@ -81,6 +82,7 @@ UserSchema.pre('save',function(next){
     next();
   }
 });
+
 var User = mongoose.model('User', UserSchema);
 
 module.exports = {User}
